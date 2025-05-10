@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 美味餐厅</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>美味餐厅</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="#" class="active">关于我们</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 关于我们内容 -->
+    <section class="about-section">
+        <div class="about-container">
+            <h1 class="section-title">关于我们</h1>
+            
+            <div class="story-section">
+                <h2>我们的故事</h2>
+                <p>美味餐厅成立于2010年，是一家专注于提供高品质美食的餐厅。我们秉承"用心烹饪，真诚服务"的理念，致力于为每位顾客提供最优质的餐饮体验。</p>
+                <p>十余年来，我们不断创新，融合传统与现代烹饪技术，为顾客带来独特的美食体验。我们相信，美食不仅仅是味道，更是一种文化的传承与创新。</p>
+            </div>
+
+            <div class="team-section">
+                <h2>我们的团队</h2>
+                <p>我们拥有一支经验丰富的厨师团队，每位厨师都经过严格的专业培训，能够为您呈现最地道的美味。</p>
+                <div class="team-highlights">
+                    <div class="highlight">
+                        <i class="fas fa-user-chef"></i>
+                        <h3>专业厨师</h3>
+                        <p>拥有10年以上烹饪经验的资深主厨</p>
+                    </div>
+                    <div class="highlight">
+                        <i class="fas fa-certificate"></i>
+                        <h3>品质保证</h3>
+                        <p>严格的食材筛选标准</p>
+                    </div>
+                    <div class="highlight">
+                        <i class="fas fa-heart"></i>
+                        <h3>用心服务</h3>
+                        <p>专业、热情的服务团队</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commitment-section">
+                <h2>我们的承诺</h2>
+                <p>我们承诺使用最新鲜的食材，最专业的烹饪技术，为您带来最满意的用餐体验。</p>
+                <ul class="commitment-list">
+                    <li><i class="fas fa-check"></i> 严选优质食材</li>
+                    <li><i class="fas fa-check"></i> 专业烹饪工艺</li>
+                    <li><i class="fas fa-check"></i> 卫生安全保障</li>
+                    <li><i class="fas fa-check"></i> 优质服务态度</li>
+                </ul>
+            </div>
+
+            <div class="contact-info">
+                <h2>联系方式</h2>
+                <div class="contact-details">
+                    <p><i class="fas fa-map-marker-alt"></i> 地址：#</p>
+                    <p><i class="fas fa-phone"></i> 电话：#</p>
+                    <p><i class="fas fa-clock"></i> 营业时间：#</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .about-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .story-section, .team-section, .commitment-section, .contact-info {
+            margin-bottom: 50px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .team-highlights {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .highlight {
+            text-align: center;
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+        }
+
+        .highlight i {
+            font-size: 2.5em;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .commitment-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .commitment-list li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .commitment-list i {
+            color: #2ecc71;
+            margin-right: 10px;
+        }
+
+        .contact-details {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .contact-details p {
+            margin: 10px 0;
+        }
+
+        .contact-details i {
+            color: #e74c3c;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .team-highlights {
+                flex-direction: column;
+            }
+
+            .highlight {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 美味餐厅</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 登录页面样式 */
+        .login-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        /* 登录容器样式 */
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* 登录头部样式 */
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-header .logo {
+            font-size: 2.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #e74c3c;
+            outline: none;
+        }
+
+        /* 登录按钮样式 */
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #c0392b;
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 错误信息样式 */
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        /* 返回链接样式 */
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面主体 -->
+    <section class="login-section">
+        <div class="login-container">
+            <!-- 登录头部 -->
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h1>管理员登录</h1>
+            </div>
+            <!-- 登录表单 -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+                <div class="error-message" id="errorMessage"></div>
+            </form>
+            <!-- 返回链接 -->
+            <div class="back-link">
+                <a href="index.html"><i class="fas fa-arrow-left"></i> 返回首页</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        /**
+         * 检查登录状态
+         * 如果用户已登录，则跳转到管理页面
+         */
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                window.location.href = 'admin.html';
+            }
+        }
+
+        /**
+         * 显示错误信息
+         * @param {string} message - 错误信息
+         */
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 3000);
+        }
+
+        /**
+         * 处理登录表单提交
+         * 1. 获取用户名和密码
+         * 2. 发送登录请求
+         * 3. 处理登录结果
+         */
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            
+            // 禁用提交按钮
+            submitButton.disabled = true;
+            submitButton.textContent = '登录中...';
+
+            try {
+                // 发送登录请求
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '登录失败');
+                }
+
+                // 登录成功，保存登录状态
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('username', data.user.username);
+                window.location.href = 'admin.html';
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                // 恢复提交按钮
+                submitButton.disabled = false;
+                submitButton.textContent = '登录';
+            }
+        });
+
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 基础元数据 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美味餐厅 - 专业餐饮服务</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>美味餐厅</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="active">首页</a></li>
+                    <li><a href="about.html">关于我们</a></li>
+                </ul>
+            </nav>
+            <div class="header-buttons">
+                <button class="add-dish-btn" onclick="window.location.href='login.html'">
+                    <i class="fas fa-plus"></i>
+                    添加菜品
+                </button>
+            </div>
+        </div>
+    </header>
+
+ 
+
+    <!-- 特色菜品部分 -->
+    <section class="featured-dishes">
+        <div class="section-header">
+            <h2>特色菜品</h2>
+            <p>我们的招牌美食，让您回味无穷</p>
+        </div>
+        <div class="dishes-container" id="dishesContainer">
+            <!-- 菜品卡片将通过JavaScript动态添加 -->
+        </div>
+    </section>
+
+    <!-- 添加菜品模态框 -->
+    <div class="modal" id="addDishModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加新菜品</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="addDishForm">
+                <div class="form-group">
+                    <label for="category">菜品名称：</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="miaoshu">菜品描述：</label>
+                    <textarea id="miaoshu" name="miaoshu" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tupian_url">菜品图片URL：</label>
+                    <input type="url" id="tupian_url" name="tupian_url" required placeholder="请输入图片URL">
+                </div>
+                <button type="submit">添加菜品</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle"></i>
+            <span class="toast-message">菜品添加成功！</span>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 从服务器获取菜品数据
+         * @async
+         */
+        async function fetchDishes() {
+            try {
+                console.log('开始获取菜品数据...');
+                const response = await fetch('http://localhost:3000/api/dishes');
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || '获取数据失败');
+                }
+                
+                const result = await response.json();
+                console.log('获取到的原始数据:', result);
+                
+                // 检查返回的数据结构
+                if (!result.success) {
+                    throw new Error(result.message || '获取数据失败');
+                }
+
+                // 从返回的数据中提取菜品记录
+                const dishes = result.data?.records;
+                console.log('提取的菜品数据:', dishes);
+
+                if (!Array.isArray(dishes)) {
+                    throw new Error('返回的数据格式不正确');
+                }
+                
+                displayDishes(dishes);
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                showToast(error.message || '获取菜品列表失败');
+            }
+        }
+
+        /**
+         * 在页面上显示菜品信息
+         * @param {Array} dishes - 菜品数据数组
+         */
+        function displayDishes(dishes) {
+            try {
+                console.log('开始显示菜品:', dishes);
+                const container = document.getElementById('dishesContainer');
+                
+                if (!container) {
+                    throw new Error('找不到菜品容器元素');
+                }
+                
+                container.innerHTML = '';
+
+                if (dishes.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-dishes">
+                            <i class="fas fa-utensils"></i>
+                            <p>暂无菜品数据</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 添加样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    .dishes-container {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 20px;
+                        padding: 20px;
+                    }
+                    .dish-card {
+                        background: #fff;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        transition: transform 0.3s ease;
+                    }
+                    .dish-card:hover {
+                        transform: translateY(-5px);
+                    }
+                    .dish-image {
+                        position: relative;
+                        padding-top: 66.67%; /* 3:2 宽高比 */
+                    }
+                    .dish-image img {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    .dish-info {
+                        padding: 16px;
+                    }
+                    .dish-info h3 {
+                        margin: 0 0 8px;
+                        color: #333;
+                        font-size: 18px;
+                    }
+                    .dish-info p {
+                        margin: 0;
+                        color: #666;
+                        font-size: 14px;
+                        line-height: 1.5;
+                    }
+                    .dish-id {
+                        margin-top: 8px;
+                        font-size: 12px;
+                        color: #999;
+                    }
+                    .no-dishes {
+                        text-align: center;
+                        padding: 40px;
+                        color: #999;
+                    }
+                    .no-dishes i {
+                        font-size: 48px;
+                        margin-bottom: 16px;
+                    }
+                    .no-dishes p {
+                        margin: 0;
+                        font-size: 16px;
+                    }
+                `;
+                document.head.appendChild(style);
+
+                dishes.forEach(dish => {
+                    console.log('处理菜品数据:', dish);
+                    if (!dish.fields) {
+                        console.warn('无效的菜品数据:', dish);
+                        return;
+                    }
+
+                    const dishCard = document.createElement('div');
+                    dishCard.className = 'dish-card';
+
+                    // 获取图片URL，优先使用tupian_url.text，如果不存在则使用备用图片
+                    const imageUrl = dish.fields.tupian_url?.text || 'https://dummyimage.com/300x200/e0e0e0/ffffff&text=暂无图片';
+                    console.log('菜品图片URL:', imageUrl);
+                    
+                    dishCard.innerHTML = `
+                        <div class="dish-image">
+                            <img src="${imageUrl}" 
+                                 alt="${dish.fields.category || '菜品图片'}" 
+                                 onerror="this.src='https://dummyimage.com/300x200/e0e0e0/ffffff&text=暂无图片'"
+                                 loading="lazy">
+                        </div>
+                        <div class="dish-info">
+                            <h3>${dish.fields.category || '未知菜品'}</h3>
+                            <p>${dish.fields.miaoshu || '暂无描述'}</p>
+                            <div class="dish-id">ID: ${dish.fields.ID || '未知'}</div>
+                        </div>
+                    `;
+                    container.appendChild(dishCard);
+                });
+
+                console.log('菜品显示完成');
+            } catch (error) {
+                console.error('显示菜品失败:', error);
+                showToast('显示菜品列表失败');
+            }
+        }
+
+        /**
+         * 添加新菜品
+         * @param {Object} dish - 菜品数据
+         */
+        async function addDish(dish) {
+            try {
+                // 验证输入数据
+                if (!dish.category || !dish.miaoshu) {
+                    throw new Error('请填写完整的菜品信息');
+                }
+
+                // 构建符合Vika API要求的数据格式
+                const record = {
+                    fields: {
+                        category: dish.category.trim(),
+                        miaoshu: dish.miaoshu.trim(),
+                        tupian_url: {
+                            text: dish.tupian_url.trim(),
+                            title: dish.tupian_url.trim()
+                        }
+                    }
+                };
+
+                console.log('准备发送的数据:', JSON.stringify([record], null, 2));
+
+                // 发送POST请求创建新菜品
+                const response = await fetch('http://localhost:3000/api/dishes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify([record])
+                });
+
+                const result = await response.json();
+                console.log('服务器响应:', result);
+
+                if (!response.ok) {
+                    throw new Error(result.detail || result.error || '添加菜品失败');
+                }
+
+                // 刷新菜品列表
+                await fetchDishes();
+                return result;
+            } catch (error) {
+                console.error('添加菜品失败:', error);
+                throw error;
+            }
+        }
+
+        // 提示框相关函数
+        function showToast(message) {
+            try {
+                const toast = document.getElementById('toast');
+                const toastMessage = toast.querySelector('.toast-message');
+                
+                if (!toast || !toastMessage) {
+                    console.error('找不到提示框元素');
+                    return;
+                }
+
+                toastMessage.textContent = message;
+                toast.style.display = 'flex';
+                toast.style.animation = 'slideIn 0.3s ease-out';
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 300);
+                }, 3000);
+            } catch (error) {
+                console.error('显示提示框失败:', error);
+            }
+        }
+
+        // 模态框相关函数
+        function openModal() {
+            try {
+                const modal = document.getElementById('addDishModal');
+                if (!modal) {
+                    throw new Error('找不到模态框元素');
+                }
+                modal.style.display = 'flex';
+            } catch (error) {
+                console.error('打开模态框失败:', error);
+                showToast('打开添加菜品窗口失败');
+            }
+        }
+
+        function closeModal() {
+            try {
+                const modal = document.getElementById('addDishModal');
+                const form = document.getElementById('addDishForm');
+                
+                if (!modal || !form) {
+                    throw new Error('找不到模态框或表单元素');
+                }
+                
+                modal.style.display = 'none';
+                form.reset();
+            } catch (error) {
+                console.error('关闭模态框失败:', error);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('页面加载完成，开始获取菜品数据...');
+            fetchDishes();
+        });
+    </script>
+</body>
+</html> 

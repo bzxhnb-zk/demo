@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 美味餐厅</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 240px;
+            background-color: #001529;
+            color: #fff;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header i {
+            font-size: 24px;
+            color: #1890ff;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sidebar-menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            color: #fff;
+            background-color: #1890ff;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航栏样式 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890ff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 内容区卡片样式 */
+        .content-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.85);
+            margin-bottom: 24px;
+        }
+
+        /* 表单样式优化 */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(0, 0, 0, 0.85);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #40a9ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            outline: none;
+        }
+
+        .submit-btn {
+            background: #1890ff;
+            border: none;
+            padding: 8px 16px;
+            color: #fff;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #40a9ff;
+        }
+
+        .submit-btn:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+
+        /* 图片预览样式 */
+        .preview-image {
+            max-width: 300px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* 消息提示样式 */
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message {
+            color: #2ecc71;
+            margin-top: 15px;
+            display: none;
+        }
+
+        /* 表格样式 */
+        .dishes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .dishes-table th,
+        .dishes-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dishes-table th {
+            background-color: #fafafa;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.85);
+        }
+
+        .dishes-table td {
+            color: rgba(0, 0, 0, 0.65);
+        }
+
+        .dishes-table img {
+            max-width: 80px;
+            border-radius: 4px;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: rgba(0, 0, 0, 0.45);
+        }
+
+        /* 数据加载错误提示 */
+        .data-error {
+            text-align: center;
+            padding: 20px;
+            color: #ff4d4f;
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            border-radius: 2px;
+            margin: 20px 0;
+        }
+
+        /* 菜品列表样式 */
+        .dishes-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .dish-card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .dish-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dish-content {
+            padding: 16px;
+        }
+
+        .dish-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.85);
+            margin-bottom: 8px;
+        }
+
+        .dish-description {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.45);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dish-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .dish-actions button {
+            padding: 4px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dish-actions button:hover {
+            color: #1890ff;
+            border-color: #1890ff;
+        }
+
+        .dish-actions .delete-btn {
+            color: #ff4d4f;
+            border-color: #ff4d4f;
+        }
+
+        .dish-actions .delete-btn:hover {
+            color: #fff;
+            background: #ff4d4f;
+            border-color: #ff4d4f;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-utensils"></i>
+            <h1>餐厅管理系统</h1>
+        </div>
+        <div class="sidebar-menu">
+            <a class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </a>
+            <a class="menu-item">
+                <i class="fas fa-user"></i>
+                <span>用户管理</span>
+            </a>
+            <a class="menu-item">
+                <i class="fas fa-utensils"></i>
+                <span>菜品管理</span>
+            </a>
+            <a class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>系统设置</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="nav-left">
+                <i class="fas fa-bars"></i>
+                <span>菜品管理</span>
+            </div>
+            <div class="nav-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span id="username"></span>
+                    <button class="logout-btn" onclick="logout()">退出登录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加菜品表单 -->
+        <div class="content-card">
+            <h2 class="card-title">添加新菜品</h2>
+            <form id="addDishForm">
+                <div class="form-group">
+                    <label for="category">菜品名称</label>
+                    <input type="text" id="category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="miaoshu">菜品描述</label>
+                    <textarea id="miaoshu" name="miaoshu" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tupian_url">图片URL</label>
+                    <input type="url" id="tupian_url" name="tupian_url" required 
+                           onchange="previewImage(this.value)">
+                    <img id="imagePreview" class="preview-image" alt="图片预览">
+                </div>
+                <button type="submit" class="submit-btn">添加菜品</button>
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+            </form>
+        </div>
+
+        <!-- 菜品列表 -->
+        <div class="content-card">
+            <h2 class="card-title">菜品列表</h2>
+            <div id="dishesList" class="dishes-list">
+                <!-- 菜品卡片将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 检查登录状态
+         * 如果用户未登录，则跳转到登录页面
+         */
+        function checkAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+        //    // 显示用户名
+       //     const username = localStorage.getItem('username');
+           // document.getElementById('username').textContent = username;
+        }
+
+        /**
+         * 退出登录
+         * 清除登录状态并跳转到登录页面
+         */
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            window.location.href = 'login.html';
+        }
+
+        /**
+         * 预览图片
+         * @param {string} url - 图片URL
+         */
+        function previewImage(url) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'block';
+            preview.src = url;
+            preview.onerror = () => {
+                preview.style.display = 'none';
+                showError('图片URL无效');
+            };
+        }
+
+        /**
+         * 显示错误信息
+         * @param {string} message - 错误信息
+         */
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            const successElement = document.getElementById('successMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            successElement.style.display = 'none';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 3000);
+        }
+
+        /**
+         * 显示成功信息
+         * @param {string} message - 成功信息
+         */
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            const errorElement = document.getElementById('errorMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            setTimeout(() => {
+                successElement.style.display = 'none';
+            }, 3000);
+        }
+
+        /**
+         * 获取所有菜品数据
+         */
+        async function fetchDishes() {
+            try {
+                const response = await fetch('http://localhost:3000/api/dishes');
+                if (!response.ok) {
+                    throw new Error('获取菜品数据失败');
+                }
+                const data = await response.json();
+                return data.records || [];
+            } catch (error) {
+                console.error('获取菜品失败:', error);
+                showError('获取菜品列表失败: ' + error.message);
+                return [];
+            }
+        }
+
+        /**
+         * 渲染菜品列表
+         */
+        async function renderDishes() {
+            const dishesContainer = document.getElementById('dishesList');
+            dishesContainer.innerHTML = ''; // 清空现有内容
+
+            const dishes = await fetchDishes();
+            
+            dishes.forEach(dish => {
+                const dishCard = document.createElement('div');
+                dishCard.className = 'dish-card';
+                
+                // 使用默认图片作为备选
+                const imageUrl = dish.fields.tupian_url?.text || 'https://dummyimage.com/300x200/e0e0e0/ffffff&text=暂无图片';
+                
+                dishCard.innerHTML = `
+                    <img src="${imageUrl}" alt="${dish.fields.category}" class="dish-image" 
+                         onerror="this.src='https://dummyimage.com/300x200/e0e0e0/ffffff&text=暂无图片'">
+                    <div class="dish-content">
+                        <h3 class="dish-title">${dish.fields.category || '未命名'}</h3>
+                        <p class="dish-description">${dish.fields.miaoshu || '暂无描述'}</p>
+                        <div class="dish-actions">
+                            <button onclick="editDish('${dish.recordId}')">编辑</button>
+                            <button class="delete-btn" onclick="deleteDish('${dish.recordId}')">删除</button>
+                        </div>
+                    </div>
+                `;
+                
+                dishesContainer.appendChild(dishCard);
+            });
+        }
+
+        /**
+         * 编辑菜品
+         * @param {string} recordId - 菜品记录ID
+         */
+        function editDish(recordId) {
+            // TODO: 实现编辑功能
+            console.log('编辑菜品:', recordId);
+        }
+
+        /**
+         * 删除菜品
+         * @param {string} recordId - 菜品记录ID
+         */
+        function deleteDish(recordId) {
+            // TODO: 实现删除功能
+            console.log('删除菜品:', recordId);
+        }
+
+        // 页面加载完成后获取菜品列表
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            renderDishes();
+        });
+
+        // 修改添加菜品成功后的处理
+        document.getElementById('addDishForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = '添加中...';
+
+            try {
+                const formData = {
+                    category: document.getElementById('category').value,
+                    miaoshu: document.getElementById('miaoshu').value,
+                    tupian_url: document.getElementById('tupian_url').value
+                };
+
+                const response = await fetch('http://localhost:3000/api/dishes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify([{
+                        fields: {
+                            category: formData.category.trim(),
+                            miaoshu: formData.miaoshu.trim(),
+                            tupian_url: {
+                                text: formData.tupian_url.trim(),
+                                title: formData.tupian_url.trim()
+                            }
+                        }
+                    }])
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.detail || result.error || '添加失败');
+                }
+
+                showSuccess('菜品添加成功！');
+                e.target.reset();
+                document.getElementById('imagePreview').style.display = 'none';
+                
+                // 重新加载菜品列表
+                renderDishes();
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '添加菜品';
+            }
+        });
+    </script>
+</body>
+</html> 
